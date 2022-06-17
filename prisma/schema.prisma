@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          Int        @id @default(autoincrement())
+  name        String      @unique @db.VarChar(255)
+  exercises   Exercise[]
+
+  @@map(name: "category")
+}
+
+model Exercise {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  url         String?   @db.VarChar(500)
+  category    Category?  @relation(fields: [categoryId], references: [id])
+  categoryId  Int?
+  set         Set?  @relation(fields: [setId], references: [id])
+  setId       Int?
+
+  @@map(name: "exercise")
+}
+
+model Set {
+  id        Int   @id @default(autoincrement())
+  exercise  Exercise?
+  reps      Int?
+  time      Int?
+  weight    Int?
+  rpe       Int?
+  batch     Batch  @relation(fields: [batchId], references: [id])
+  batchId   Int
+
+  @@map(name: "set")
+}
+
+model Batch {
+  id          Int     @id @default(autoincrement())
+  sets        Set[]
+  workout     Workout  @relation(fields: [workoutId], references: [id])
+  workoutId   Int
+  
+  @@map(name: "batch")
+}
+
+model Workout {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  batches     Batch[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map(name: "workout")
+}
